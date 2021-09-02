@@ -103,21 +103,18 @@ const ContainerConteudo = styled.div`
         background-color: #CBCBCB;
     }
 
-
-
-
     .chat-message {
         display: flex;
         flex-direction: row;
+        align-items: center;
 
         font-size: .9em;
         margin: .4em .2em;
     }
 
     .chat-message > div {
-        margin: 0em .2em;
+        margin: 0em .2em;       
     }
-
 
     @media (max-width: 400px) {
         flex-direction: column;

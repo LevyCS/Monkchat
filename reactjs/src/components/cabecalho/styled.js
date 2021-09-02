@@ -25,6 +25,12 @@ const ContainerCabecalho = styled.div`
         font: 700 2.2em Montserrat;
     }
 
+    .sair {
+        flex-grow: 1;
+        text-align: right;
+        font: 700 2.2em Montserrat;
+        cursor: pointer;
+    }
 
     @media (max-width: 400px) {
         flex-direction: column;
