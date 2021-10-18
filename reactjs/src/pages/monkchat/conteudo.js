@@ -29,14 +29,13 @@ export default function Conteudo() {
 
     const [chat, setChat] = useState([]);
     const [sala, setSala] = useState('');
-    const [usu, setUsu] = useState(usuarioLogado.nm_usuario);
     const [msg, setMsg] = useState('')
+    const [idAlterado, setIdAlterado] = useState(0);
+    const [usu, setUsu] = useState(usuarioLogado.nm_usuario);
 
     const loading = useRef(null);
 
     const validarResposta = (resp) => {
-        //console.log(resp);
-
         if (!resp.erro)
             return true;
         toast.error(`${resp.erro}`);
@@ -57,11 +56,21 @@ export default function Conteudo() {
         if (event.type === "keypress" && (!event.ctrlKey || event.charCode !== 13))
             return;
 
-        const resp = await api.inserirMensagem(sala, usu, msg);
-        if (!validarResposta(resp)) 
-            return;
-        
-        toast.dark('💕 Mensagem enviada com sucesso!');
+        if (idAlterado > 0) {
+            const resp = await api.alterarMensagem(idAlterado, msg)
+            if(!validarResposta(resp))
+                return;
+
+            toast.dark('💕 Mensagem alterada com sucesso!')    
+            setIdAlterado(0);
+        } else {
+            const resp = await api.inserirMensagem(sala, usu, msg);
+
+            if (!validarResposta(resp)) 
+                return;
+            toast.dark('💕 Mensagem enviada com sucesso!');
+        }
+
         setMsg('')
         await carregarMensagens();
     }
@@ -75,14 +84,30 @@ export default function Conteudo() {
         await carregarMensagens();
     }
 
-    const deletarMensagem = async (id) => {
-        const r = await api.deletarMensagem(id);
+    const deletarMensagem = async (item) => {
+        if (!(usu == item.tb_usuario.nm_usuario)) {
+            toast.dark('Não é possivel excluir mensagens de outro usuário')
+            return;
+        }
+
+        if(!(window.confirm('Tem certeza que deseja excluir a mensagem?'))) 
+            return;
+
+        const r = await api.deletarMensagem(item.id_chat);
+
         if (!validarResposta(r))
             return;
 
         toast.dark('💕 Mensagem apagada')
         await carregarMensagens();
     } 
+
+    const alterarMensagem = async (item) => {
+        setIdAlterado(item.id_chat);
+        setMsg(item.ds_mensagem);
+    }
+
+    
 
     return (
         <ContainerConteudo>
@@ -113,23 +138,29 @@ export default function Conteudo() {
             <div className="container-chat">
                 
                 <img onClick={carregarMensagens}
-                   className="chat-atualizar"
-                         src="/assets/images/atualizar.png" alt="" />
+                    className="chat-atualizar"
+                    src="/assets/images/atualizar.png" alt="" 
+                />
                 
                 <div className="chat">
                     {chat.map(x =>
                         <div key={x.id_chat}>
                             <div className="chat-message">
+                                <img className="chat-alterar" style={{ cursor: "pointer" }}
+                                    onClick={() => alterarMensagem(x)}
+                                    src="/assets/images/alterar.svg" alt=""
+                                />
                                 <img 
-                                    onClick={() => {deletarMensagem(x.id_chat)}}
-                                    src="/assets/images/delete_remove_bin_icon-icons.com_72400.svg" style={{cursor: "pointer"}} alt="" />
+                                    onClick={() => {deletarMensagem(x)}}
+                                    src="/assets/images/deletar.svg" style={{cursor: "pointer"}} alt="" 
+                                        
+                                />
                                 <div>({new Date(x.dt_mensagem.replace('Z', '')).toLocaleTimeString()})</div>
                                 <div><b>{x.tb_usuario.nm_usuario}</b> fala para <b>Todos</b>:</div>
                                 <div> {x.ds_mensagem} </div>
                             </div>
                         </div>
                     )}
-                    
                 </div>
             </div>
         </ContainerConteudo>

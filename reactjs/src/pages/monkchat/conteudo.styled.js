@@ -113,7 +113,7 @@ const ContainerConteudo = styled.div`
     }
 
     .chat-message > div {
-        margin: 0em .2em;       
+        margin: 0em .2em;    
     }
 
     @media (max-width: 400px) {
